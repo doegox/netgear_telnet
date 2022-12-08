@@ -9,7 +9,6 @@ from qiling import *
 from unicorn import *
 from unicorn.arm_const import *
 import logging
-from Library.utils import *
 from struct import pack, unpack
 import time
 from binascii import hexlify
@@ -104,8 +103,6 @@ def hook_mem_invalid(uc, access, address, size, value, user_data):
 def main():
     filename = "telnetenable_RBR760-V6.3.6.2"
     data = open(filename, "rb").read()
-    elfheader = elf(data, filename)
-    pt = patchtools()
 
     ql = Qiling([filename], rootfs=".")
     ql.gdb = "0.0.0.0:9999"
