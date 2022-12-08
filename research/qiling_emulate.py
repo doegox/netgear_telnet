@@ -12,6 +12,7 @@ import logging
 from Library.utils import *
 from struct import pack, unpack
 import time
+from binascii import hexlify
 
 password=b"test"
 mac=bytes.fromhex("000102030405")
@@ -19,8 +20,8 @@ mac=bytes.fromhex("000102030405")
 def replace_function(ql, addr, callback):
     def runcode(ql):
         ret = callback(ql)
-        ql.reg.r0 = ret
-        ql.reg.pc = ql.reg.lr
+        ql.arch.regs.r0 = ret
+        ql.arch.regs.pc = ql.arch.regs.lr
 
     ql.hook_address(runcode, addr)
 
@@ -100,7 +101,7 @@ def main():
     elfheader = elf(data, filename)
     pt = patchtools()
 
-    ql = Qiling([filename], rootfs=".", output="default")
+    ql = Qiling([filename], rootfs=".")
     ql.gdb = "0.0.0.0:9999"
     ql.arch.enable_vfp()
 
@@ -108,12 +109,12 @@ def main():
         return 0
 
     def config_get(ql):
-        ql.reg.R0 = 0xc221000
+        ql.arch.regs.R0 = 0xc221000
         ql.mem.write(0xc221000, password)
-        return ql.reg.R0
+        return ql.arch.regs.R0
 
     def ioctl(ql):
-        ql.mem.write(ql.reg.R2+18, mac)
+        ql.mem.write(ql.arch.regs.R2+18, mac)
         return 0
 
     def socket(ql):
@@ -123,9 +124,9 @@ def main():
         return 0
 
     def memset(ql):
-        dst = ql.reg.R0
-        val = ql.reg.R1
-        count = ql.reg.R2
+        dst = ql.arch.regs.R0
+        val = ql.arch.regs.R1
+        count = ql.arch.regs.R2
         data = bytearray()
         for i in range(count):
             data.append(val)
@@ -133,30 +134,30 @@ def main():
         return 0
 
     def strncpy(ql):
-        data = ql.mem.read(ql.reg.R1, ql.reg.R2)
+        data = ql.mem.read(ql.arch.regs.R1, ql.arch.regs.R2)
         rdata = bytearray()
         for d in data:
             if d == 0:
                 break
             rdata.append(d)
-        target = ql.reg.R0
+        target = ql.arch.regs.R0
         ql.mem.write(target, bytes(rdata))
         return len(rdata)
 
     def memmove(ql):
-        data=ql.mem.read(ql.reg.R1,ql.reg.R2)
+        data=ql.mem.read(ql.arch.regs.R1,ql.arch.regs.R2)
         print("Memmove: "+hexlify(data).decode('utf-8'))
-        ql.mem.write(ql.reg.R0,bytes(data))
-        return ql.reg.R2
+        ql.mem.write(ql.arch.regs.R0,bytes(data))
+        return ql.arch.regs.R2
 
     def snprintf(ql):
-        dst=ql.reg.R0
-        maxlen=ql.reg.R1
+        dst=ql.arch.regs.R0
+        maxlen=ql.arch.regs.R1
         fmt = bytearray()
         tmp = -1
         pos = 0
         while tmp != 0:
-            v = ql.mem.read(ql.reg.R2 + pos,1)[0]
+            v = ql.mem.read(ql.arch.regs.R2 + pos,1)[0]
             if v == 0:
                 break
             pos += 1
@@ -166,7 +167,7 @@ def main():
         tmp = -1
         pos = 0
         while tmp != 0:
-            v = ql.mem.read(ql.reg.R3 + pos,1)[0]
+            v = ql.mem.read(ql.arch.regs.R3 + pos,1)[0]
             if v == 0:
                 break
             pos += 1
@@ -182,12 +183,12 @@ def main():
         tmp = -1
         pos = 0
         while tmp != 0:
-            v = ql.mem.read(ql.reg.R1 + pos,1)[0]
+            v = ql.mem.read(ql.arch.regs.R1 + pos,1)[0]
             if v == 0:
                 break
             pos += 1
             rdata.append(v)
-        ql.mem.write(ql.reg.R0,bytes(rdata))
+        ql.mem.write(ql.arch.regs.R0,bytes(rdata))
         return len(rdata)
 
     ql.uc.hook_add(UC_HOOK_MEM_INVALID, hook_mem_invalid)
@@ -203,8 +204,7 @@ def main():
     replace_function(ql, 0x106C4, memmove)
     replace_function(ql, 0x106A0, strcpy)
     replace_function(ql, 0x106D0, snprintf)
-
-    ql.reg.sp = 0x10774 + 0x12000  # SP from main
+    ql.arch.regs.sp = 0x10774 + 0x12000  # SP from main
 
     ql.mem.map(0x13000, 0xD000)
     ql.mem.map(0x20000, 0x2000)
