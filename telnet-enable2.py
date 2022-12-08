@@ -504,6 +504,7 @@ def genhash(mac, username, password='', mode=1):
     # print("MD5:"+hexlify(md5_key).decode('utf-8'))
     if mode==3:
         md5_key = md5_key[4:4+(4*4)] + b"\x00"*4
+        # print("new MD5:"+hexlify(md5_key).decode('utf-8'))
     payload = (md5_key + cleartext[:0x70]).ljust(0xB0, b'\x00')
     #print("Payload: " + hexlify(payload).decode('utf-8'))
     if mode==2:
@@ -511,10 +512,11 @@ def genhash(mac, username, password='', mode=1):
     elif mode in [1,3]:
         spassword = password
     secret_key = ('AMBIT_TELNET_ENABLE+' + spassword)[:0x80]
+    # print("Key: " + secret_key)
 
     cipher = Blowfish(secret_key.encode('utf8'), byte_order="little")
     rdata = b"".join(cipher.encrypt_ecb(payload))
-    #print(hexlify(rdata).decode('utf-8'))
+    print(hexlify(rdata).decode('utf-8'))
     return rdata
 
 
@@ -565,12 +567,15 @@ def sendtelnet(ip, data):
     else:
         conn.send(data)
         try:
+            print("Receiving...")
             retval = conn.recvfrom(1024)
+            print("Received! %s" % retval.decode('utf8'))
             conn.close()
             if b"ACK" in retval:
                 return True
         except:
             conn.close()
+            print("Timeout!")
             return False
         return False        
 
@@ -673,6 +678,7 @@ def main():
     if not username and len(password) > 0:
         username = "admin"  # Most devices only allows 'admin' as the username
     mac = mac.replace(":", "").replace("-", "").upper()
+    print("IP:%s MAC:%s USER:%s PWD:%s" % (ip, mac, username, password))
 
     hash = genhash(mac, username, password, mode=1)
     hashtest(mac, username, password, hash, mode=1)
