@@ -187,7 +187,7 @@ def main():
         count = ql.arch.regs.R2
         data = ql.mem.read(src, count)
         print("memcpy:", data)
-        with open('telnet_update_sh_RBR760-V6.3.6.2.sh', 'wb') as f:
+        with open(filename+'.sh', 'wb') as f:
             f.write(data)
         ql.mem.write(dst, bytes(data))
         return 0

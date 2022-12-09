@@ -39,12 +39,12 @@ def hook_code(uc, access, address, size):
 #        print("PC at 0x%x (0x%x)" % (pc, pc-OFF))
     if pc==OFF+0x11378:
          uc.reg_write(UC_ARM_REG_PC, pc+4)
-    if pc==OFF+0x1182c: # skip prep_exec
+    if pc==OFF+0x11824: # skip prep_exec
         uc.reg_write(UC_ARM_REG_R0,1)
         uc.reg_write(UC_ARM_REG_PC, pc+4)
     if pc==OFF+0x11a44:
          uc.reg_write(UC_ARM_REG_PC, pc+4)
-    if pc==OFF+0x11aa4:
+    if pc==OFF+0x11a84:
          uc.reg_write(UC_ARM_REG_PC, pc+8)
 
 def hook_mem_invalid(uc, access, address, size, value, user_data):
@@ -74,7 +74,7 @@ def hook_mem_invalid(uc, access, address, size, value, user_data):
 
 
 def main():
-    filename = "debug_telnetenable_sh_RBR760-V6.3.6.2"
+    filename = "etc_initd_telnet_RBR760-V6.3.6.2"
     data = open(filename, "rb").read()
 
     ql = Qiling([filename], rootfs=".")
@@ -223,11 +223,11 @@ def main():
     replace_function(ql, OFF+0x10bac, execvp)
 
 # xref of main -> hover __libc_start_main -> thunk
-    ql.arch.regs.sp = 0x10b78 + 0x12000  # SP from main
+    ql.arch.regs.sp = 0x10b84 + 0x12000  # SP from main
 
     ql.mem.map(0x20000, 0x4000)
     ql.mem.map(0xc000000, 0x100000)
-    ql.run(begin=OFF+0x11684, end=OFF+0x11c3c)
+    ql.run(begin=OFF+0x11684, end=OFF+0x11c20)
 
 
 if __name__ == "__main__":
