@@ -1,0 +1,12 @@
+[x] 	Memory map:
+[x] 	Start        End          Perm    Label                              Image
+[x] 	0000014000 - 0000018000   rwx     [mapped]                           
+[x] 	0000020000 - 0000024000   rwx     [mapped]                           
+[x] 	00047ba000 - 0004828000   r-x     ld-musl-arm.so.1                   /home/install/Netgear_AX5400/netgear_telnet/research/lib/ld-musl-arm.so.1
+[x] 	0004837000 - 000483b000   rw-     ld-musl-arm.so.1                   /home/install/Netgear_AX5400/netgear_telnet/research/lib/ld-musl-arm.so.1
+[x] 	000c221000 - 000c221400   rwx     [mapped]                           
+[x] 	0056555000 - 0056557000   r-x     telnet_update_sh_RBR760-V6.3.6.2   /home/install/Netgear_AX5400/netgear_telnet/research/telnet_update_sh_RBR760-V6.3.6.2
+[x] 	0056567000 - 0056569000   rw-     telnet_update_sh_RBR760-V6.3.6.2   /home/install/Netgear_AX5400/netgear_telnet/research/telnet_update_sh_RBR760-V6.3.6.2
+[x] 	0056569000 - 005656b000   rwx     [hook_mem]                         
+[x] 	007ff0d000 - 007ff3d000   rwx     [stack]                            
+[x] 	00ffff0000 - 00ffff1000   rwx     [arm_traps]                        
